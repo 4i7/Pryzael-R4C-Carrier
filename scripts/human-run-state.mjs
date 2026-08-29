@@ -93,11 +93,18 @@ export function prepareHumanSubject({ runDir: runDirInput, slotId, attestationFi
   requireUsableSlot(record);
   if (record.subject) throw new Error(`SUBJECT already prepared for slot ${slotId}`);
 
-  const attestationPath = resolveExternalExistingFile(attestationFile, 'host attestation file');
+  const input = readExternalOperatorInput({
+    context,
+    record,
+    inputPath: attestationFile,
+    label: 'host attestation file',
+    unavailableCode: 'HOST_ATTESTATION_UNESTABLISHED'
+  });
+  if (input.inconclusive) return input.inconclusive;
+
   let attestation;
   try {
-    const attestationBytes = readFileSync(attestationPath);
-    attestation = JSON.parse(UTF8.decode(attestationBytes));
+    attestation = JSON.parse(UTF8.decode(input.bytes));
     buildHostProfile(attestation);
   } catch (error) {
     return markAndPersistInconclusive(context, record, `HOST_ATTESTATION_UNESTABLISHED: ${error.message}`);
@@ -153,8 +160,15 @@ export function captureHumanResponse({ runDir: runDirInput, slotId, responseFile
   if (!record.subject) throw new Error(`SUBJECT not prepared for slot ${slotId}`);
   if (record.response) throw new Error(`response already captured for slot ${slotId}`);
 
-  const inputPath = resolveExternalExistingFile(responseFile, 'operator response file');
-  const exactBytes = readFileSync(inputPath);
+  const input = readExternalOperatorInput({
+    context,
+    record,
+    inputPath: responseFile,
+    label: 'operator response file',
+    unavailableCode: 'RESPONSE_BYTES_UNAVAILABLE'
+  });
+  if (input.inconclusive) return input.inconclusive;
+  const exactBytes = input.bytes;
   const timestamp = new Date().toISOString();
   const capture = captureResponse(exactBytes, { captureMethod: RESPONSE_CAPTURE_METHOD, timestamp });
   if (capture.status !== 'CAPTURED') return markAndPersistInconclusive(context, record, capture.reason);
@@ -262,8 +276,15 @@ export function recordHumanJudgeResult({ runDir: runDirInput, blindId, resultFil
   const expectedBlindId = deriveJudgeBlindId(canonicalSlot, decodeBlindingKey(context.state));
   if (expectedBlindId !== blindId) return markAndPersistInconclusive(context, record, 'JUDGE_BLIND_ID_MISMATCH');
 
-  const inputPath = resolveExternalExistingFile(resultFile, 'Judge result file');
-  const exactBytes = readFileSync(inputPath);
+  const input = readExternalOperatorInput({
+    context,
+    record,
+    inputPath: resultFile,
+    label: 'Judge result file',
+    unavailableCode: 'JUDGE_RESULT_BYTES_UNAVAILABLE'
+  });
+  if (input.inconclusive) return input.inconclusive;
+  const exactBytes = input.bytes;
   const timestamp = new Date().toISOString();
   const capture = captureResponse(exactBytes, { captureMethod: JUDGE_CAPTURE_METHOD, timestamp });
   if (capture.status !== 'CAPTURED') return markAndPersistInconclusive(context, record, capture.reason);
@@ -465,6 +486,18 @@ function decodeBlindingKey(state) {
   const key = Buffer.from(state.blindingKeyBase64 ?? '', 'base64');
   if (key.length < 32) throw new Error('private blinding state invalid');
   return key;
+}
+
+function readExternalOperatorInput({ context, record, inputPath, label, unavailableCode }) {
+  try {
+    const canonical = resolveExternalExistingFile(inputPath, label);
+    return Object.freeze({ bytes: readFileSync(canonical), inconclusive: null });
+  } catch (error) {
+    return Object.freeze({
+      bytes: null,
+      inconclusive: markAndPersistInconclusive(context, record, `${unavailableCode}: ${error.message}`)
+    });
+  }
 }
 
 function markAndPersistInconclusive(context, record, reason) {
