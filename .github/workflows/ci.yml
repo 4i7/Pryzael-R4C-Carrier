@@ -1,0 +1,38 @@
+name: public-carrier-ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout carrier
+        uses: actions/checkout@v4
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Checkout exact frozen Pryzael source
+        uses: actions/checkout@v4
+        with:
+          repository: 4i7/Pryzael
+          ref: 3bba19e0be936e7b9d3554ac737d32f5cf84c846
+          path: frozen-pryzael
+          fetch-depth: 1
+      - name: Unit and invariant tests
+        run: npm test
+      - name: Verify frozen manifest and repeat render
+        run: |
+          node scripts/build-frozen-manifest.mjs --source frozen-pryzael --check frozen/current-manifest.json
+          node scripts/build-frozen-manifest.mjs --source frozen-pryzael --check frozen/current-manifest.json
+      - name: Public synthetic dry-run mechanics
+        env:
+          PRYZAEL_SOURCE_ROOT: ${{ github.workspace }}/frozen-pryzael
+        run: npm run dry-run
+      - name: Scan public repository boundary
+        run: npm run scan
