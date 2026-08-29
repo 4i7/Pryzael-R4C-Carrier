@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "dry-run": "node scripts/public-dry-run.mjs",
+    "human-run": "node scripts/human-run.mjs",
     "scan": "node scripts/scan-public-repo.mjs"
   }
 }
