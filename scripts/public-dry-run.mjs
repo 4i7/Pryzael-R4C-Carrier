@@ -6,7 +6,54 @@ import { FROZEN_IDENTITY } from '../src/constants.mjs';
 import { verifyRendererImplementation } from '../src/condition-renderer.mjs';
 import { loadFrozenMaterial, verifyFrozenIdentity, verifyManifestDigest } from '../src/frozen-source.mjs';
 import { runPublicDryRunMechanics } from '../src/public-dry-run.mjs';
-function readTask(root,taskId){const task=JSON.parse(readFileSync(resolve(root,taskId,'task.json'),'utf8'));if(task.taskId!==taskId)throw new Error(`public task identity mismatch: ${taskId}`);return{taskId,prompt:task.prompt,syntheticResponse:readFileSync(resolve(root,taskId,'synthetic-response.txt'))};}
-const sourceRoot=process.env.PRYZAEL_SOURCE_ROOT;if(!sourceRoot)throw new Error('PRYZAEL_SOURCE_ROOT is required and must name the exact frozen checkout');const repositoryRoot=resolve(import.meta.dirname,'..');const manifest=JSON.parse(readFileSync(resolve(repositoryRoot,'frozen/current-manifest.json'),'utf8'));verifyFrozenIdentity(manifest.identity,FROZEN_IDENTITY);verifyManifestDigest(manifest);verifyRendererImplementation(manifest);const materialByPath=loadFrozenMaterial(resolve(sourceRoot),manifest);const fixtureRoot=resolve(repositoryRoot,'fixtures/public');const tasks=['DEV-SIMPLE-001','DEV-REPLAN-001'].map(id=>readTask(fixtureRoot,id));const judgeAuthority=JSON.parse(readFileSync(resolve(fixtureRoot,'judge-authority.json'),'utf8'));
-const result=runPublicDryRunMechanics({identity:FROZEN_IDENTITY,manifest,materialByPath,tasks,authorityEnvelope:'Use only the supplied public development task, the visible ordinary tools, and the authority explicitly present in this envelope.',judgeAuthority,hostAttestation:{temporaryChat:true,outsideProjects:true,personalization:false,nativePryzael:false,pluginPryzael:false,mcpPryzael:false,candidateMaterial:false,sessionReused:false,model:'PUBLIC-SYNTHETIC-MODEL',product:'PUBLIC-SYNTHETIC-TEMPORARY-CHAT-PROFILE',ordinaryTools:[],authorizationEnvelope:'PUBLIC-SYNTHETIC-ONLY'},blindingKey:createHash('sha256').update('pryzael-r4c-public-synthetic-blinding-v1').digest()});
-const summary={mode:result.mode,subjectSlotsPrepared:result.subjects.length,blindedJudgeEnvelopesPrepared:result.judges.length,completeness:result.completeness,currentRenderSha256:result.currentRenderSha256,absentRenderSha256:result.absentRenderSha256,hiddenBaselineExecuted:result.hiddenBaselineExecuted,subjectDeliverySha256:result.subjects.map(s=>s.deliverySha256).sort(),judgeBlindIds:result.judges.map(j=>j.judgeBlindId).sort()};process.stdout.write(`${JSON.stringify(summary,null,2)}\n`);
+
+function readTask(root, taskId) {
+  const task = JSON.parse(readFileSync(resolve(root, taskId, 'task.json'), 'utf8'));
+  if (task.taskId !== taskId) throw new Error(`public task identity mismatch: ${taskId}`);
+  return { taskId, prompt: task.prompt, syntheticResponse: readFileSync(resolve(root, taskId, 'synthetic-response.txt')) };
+}
+
+const sourceRoot = process.env.PRYZAEL_SOURCE_ROOT;
+if (!sourceRoot) throw new Error('PRYZAEL_SOURCE_ROOT is required and must name the exact frozen checkout');
+const repositoryRoot = resolve(import.meta.dirname, '..');
+const manifest = JSON.parse(readFileSync(resolve(repositoryRoot, 'frozen/current-manifest.json'), 'utf8'));
+verifyFrozenIdentity(manifest.identity, FROZEN_IDENTITY);
+verifyManifestDigest(manifest);
+verifyRendererImplementation(manifest);
+const materialByPath = loadFrozenMaterial(resolve(sourceRoot), manifest);
+const fixtureRoot = resolve(repositoryRoot, 'fixtures/public');
+const tasks = ['DEV-SIMPLE-001','DEV-REPLAN-001'].map((id) => readTask(fixtureRoot, id));
+const judgeAuthorityBytes = readFileSync(resolve(fixtureRoot, 'judge-authority.json'));
+const result = runPublicDryRunMechanics({
+  identity: FROZEN_IDENTITY,
+  manifest,
+  materialByPath,
+  tasks,
+  judgeAuthorityBytes,
+  hostAttestation: {
+    temporaryChat: true,
+    outsideProjects: true,
+    personalization: false,
+    nativePryzael: false,
+    pluginPryzael: false,
+    mcpPryzael: false,
+    candidateMaterial: false,
+    sessionReused: false,
+    model: 'PUBLIC-SYNTHETIC-MODEL',
+    product: 'PUBLIC-SYNTHETIC-TEMPORARY-CHAT-PROFILE',
+    ordinaryTools: []
+  },
+  blindingKey: createHash('sha256').update('pryzael-r4c-public-synthetic-blinding-v1').digest()
+});
+const summary = {
+  mode: result.mode,
+  subjectSlotsPrepared: result.subjects.length,
+  blindedJudgeEnvelopesPrepared: result.judges.length,
+  completeness: result.completeness,
+  currentRenderSha256: result.currentRenderSha256,
+  absentRenderSha256: result.absentRenderSha256,
+  hiddenBaselineExecuted: result.hiddenBaselineExecuted,
+  subjectDeliverySha256: result.subjects.map((subject) => subject.deliverySha256).sort(),
+  judgeBlindIds: result.judges.map((judge) => judge.judgeBlindId).sort()
+};
+process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);

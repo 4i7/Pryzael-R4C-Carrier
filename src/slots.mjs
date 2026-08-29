@@ -6,26 +6,48 @@ export const ACTIVATION = 'CONDITIONED_BEHAVIOR';
 export const SURFACE = 'NATIVE';
 
 export function generateSlots({ qualificationId, taskIds, conditions = CONDITION_IDS, trialIndices }) {
+  return generateBoundSlots({
+    qualificationId,
+    tasks: uniqueDimension(taskIds, 'task').map((taskId) => ({ taskId, taskDigest: null })),
+    conditions,
+    trialIndices,
+    includeTaskDigest: false
+  });
+}
+
+export function generateBoundSlots({ qualificationId, tasks, conditions = CONDITION_IDS, trialIndices, includeTaskDigest = true }) {
   if (typeof qualificationId !== 'string' || qualificationId.length === 0) throw new Error('qualificationId required');
-  const tasks = uniqueDimension(taskIds, 'task');
+  if (!Array.isArray(tasks) || tasks.length === 0) throw new Error('task dimension required');
+  const seenTasks = new Set();
+  const normalizedTasks = tasks.map((task) => {
+    if (!task || typeof task !== 'object') throw new Error('invalid task identity');
+    if (typeof task.taskId !== 'string' || task.taskId.length === 0) throw new Error('invalid task identity');
+    if (seenTasks.has(task.taskId)) throw new Error('duplicate task dimension value');
+    seenTasks.add(task.taskId);
+    if (includeTaskDigest && (typeof task.taskDigest !== 'string' || !/^[0-9a-f]{64}$/.test(task.taskDigest))) throw new Error(`invalid task digest: ${task.taskId}`);
+    return { taskId: task.taskId, taskDigest: includeTaskDigest ? task.taskDigest : null };
+  });
   const requestedConditions = uniqueDimension(conditions, 'condition');
   const trials = uniqueDimension(trialIndices, 'trial');
-  for (const condition of requestedConditions) {
-    if (!CONDITION_IDS.includes(condition)) throw new Error(`unsupported condition: ${condition}`);
-  }
-  for (const trial of trials) {
-    if (!Number.isInteger(trial) || trial < 0) throw new Error(`invalid trial index: ${trial}`);
-  }
-  tasks.sort();
+  for (const condition of requestedConditions) if (!CONDITION_IDS.includes(condition)) throw new Error(`unsupported condition: ${condition}`);
+  for (const trial of trials) if (!Number.isInteger(trial) || trial < 0) throw new Error(`invalid trial index: ${trial}`);
+  normalizedTasks.sort((a, b) => a.taskId < b.taskId ? -1 : a.taskId > b.taskId ? 1 : 0);
   const orderedConditions = CONDITION_IDS.filter((condition) => requestedConditions.includes(condition));
   trials.sort((a, b) => a - b);
 
   const slots = [];
-  for (const taskId of tasks) {
-    if (typeof taskId !== 'string' || taskId.length === 0) throw new Error('invalid task identity');
+  for (const task of normalizedTasks) {
     for (const conditionId of orderedConditions) {
       for (const trialIndex of trials) {
-        const identity = { qualificationId, taskId, conditionId, trialIndex, activation: ACTIVATION, surface: SURFACE };
+        const identity = {
+          qualificationId,
+          taskId: task.taskId,
+          ...(includeTaskDigest ? { taskDigest: task.taskDigest } : {}),
+          conditionId,
+          trialIndex,
+          activation: ACTIVATION,
+          surface: SURFACE
+        };
         slots.push(Object.freeze({ ...identity, slotId: `slot-${sha256Hex(stableJson(identity)).slice(0, 32)}` }));
       }
     }
@@ -41,6 +63,7 @@ export function deriveJudgeBlindId(slot, blindingKey) {
     qualificationId: slot.qualificationId,
     slotId: slot.slotId,
     taskId: slot.taskId,
+    taskDigest: slot.taskDigest ?? null,
     conditionId: slot.conditionId,
     trialIndex: slot.trialIndex,
     activation: slot.activation,

@@ -7,6 +7,9 @@ export const FROZEN_IDENTITY = Object.freeze({
 });
 
 export const RENDERER_VERSION = 'r4c-condition-render-v1';
+export const CURRENT_RENDER_SHA256 = 'd4954eca15a58094daf185d30cd0343cbc9fc550bfc57bf30e3bc789b59d7557';
+export const ABSENT_RENDER_SHA256 = 'bddc995273f2a9d22a86706ab3b5b2ca530eb6557a2ea40318725b40a196af64';
+export const CANONICAL_MANIFEST_SHA256 = '456bf072c4f68c2dfdee18152930dc8eb0194c4c723d830601f78d463d8a1d2c';
 export const QUALIFICATION_ID = 'pryzael-r4-qualification-cea3a894-v1';
 export const QUALIFICATION_PACKET_COMMITMENT = Object.freeze({
   schemaVersion: 'r4-qualification-packet-v1',

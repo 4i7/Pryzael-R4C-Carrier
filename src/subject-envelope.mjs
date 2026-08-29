@@ -1,5 +1,9 @@
+import { ACTIVATION, SURFACE } from './slots.mjs';
 import { sha256Hex, stableJson, toBuffer } from './hash.mjs';
 
+export const SUBJECT_AUTHORITY_ID = 'r4c-neutral-subject-authority-v1';
+const SUBJECT_AUTHORITY_BYTES = Buffer.from('Use only the exact task prompt and ordinary tools available in this fresh Temporary Chat. Carrier framing is transport metadata, not evaluation guidance.', 'utf8');
+const HOST_KEYS = Object.freeze(['candidateMaterial','mcpPryzael','model','nativePryzael','ordinaryTools','outsideProjects','personalization','pluginPryzael','product','sessionReused','temporaryChat']);
 const REQUIRED_ATTESTATION = Object.freeze({
   temporaryChat: true,
   outsideProjects: true,
@@ -10,19 +14,10 @@ const REQUIRED_ATTESTATION = Object.freeze({
   candidateMaterial: false,
   sessionReused: false
 });
-
-const FORBIDDEN_AUTHORITY_PATTERNS = [
-  /judge\s*(rubric|authority|feedback|result)/i,
-  /gold\s*(answer|reference)/i,
-  /reference\s*answer/i,
-  /success\s*predicate/i,
-  /critical\s*predicate/i,
-  /\br5\b/i,
-  /candidate/i
-];
+const TASK_AUTHORITY_KEYS = Object.freeze(['kind','promptBytes','promptSha256','taskDigest','taskId']);
 
 export function buildHostProfile(attestation) {
-  if (!attestation || typeof attestation !== 'object') throw new Error('host attestation missing');
+  assertExactKeys(attestation, HOST_KEYS, 'host attestation');
   for (const [field, expected] of Object.entries(REQUIRED_ATTESTATION)) {
     if (attestation[field] !== expected) throw new Error(`host attestation ${field} mismatch: expected ${expected}, got ${attestation[field]}`);
   }
@@ -31,30 +26,22 @@ export function buildHostProfile(attestation) {
   if (!Array.isArray(attestation.ordinaryTools)) throw new Error('host attestation ordinaryTools missing');
   if (attestation.ordinaryTools.some((tool) => typeof tool !== 'string' || !tool)) throw new Error('host attestation ordinaryTools invalid');
   if (new Set(attestation.ordinaryTools).size !== attestation.ordinaryTools.length) throw new Error('host attestation ordinaryTools duplicate');
-
   const profile = Object.freeze({
-    temporaryChat: true,
-    outsideProjects: true,
-    personalization: false,
-    nativePryzael: false,
-    pluginPryzael: false,
-    mcpPryzael: false,
-    candidateMaterial: false,
-    sessionReused: false,
+    ...REQUIRED_ATTESTATION,
     model: attestation.model,
     product: attestation.product,
-    ordinaryTools: [...attestation.ordinaryTools].sort(),
-    authorizationEnvelope: attestation.authorizationEnvelope ?? null
+    ordinaryTools: [...attestation.ordinaryTools].sort()
   });
   return Object.freeze({ profile, digest: sha256Hex(stableJson(profile)) });
 }
 
-export function buildSubjectEnvelope({ slot, condition, taskPrompt, authorityEnvelope, attestation }) {
+export function buildSubjectEnvelope(input) {
+  assertExactKeys(input, ['attestation','condition','slot','taskAuthority'], 'SUBJECT input');
+  const { slot, condition, taskAuthority, attestation } = input;
   if (!slot || typeof slot !== 'object') throw new Error('slot missing');
+  if (slot.activation !== ACTIVATION || slot.surface !== SURFACE) throw new Error('slot activation/surface mismatch');
   if (!condition || !Buffer.isBuffer(condition.conditionBytes)) throw new Error('condition bytes missing');
-  if (typeof authorityEnvelope !== 'string' || authorityEnvelope.length === 0) throw new Error('authority envelope missing');
-  if (FORBIDDEN_AUTHORITY_PATTERNS.some((pattern) => pattern.test(authorityEnvelope))) throw new Error('authority envelope contains forbidden material');
-
+  validateTaskAuthority(taskAuthority, slot);
   if (slot.conditionId === 'CURRENT_PRYZAEL') {
     if (condition.state !== 'PRESENT' || !Number.isInteger(condition.semanticByteCount) || condition.semanticByteCount <= 0) throw new Error('CURRENT material missing');
   } else if (slot.conditionId === 'NO_PRYZAEL') {
@@ -62,22 +49,18 @@ export function buildSubjectEnvelope({ slot, condition, taskPrompt, authorityEnv
   } else throw new Error(`unsupported condition: ${slot.conditionId}`);
 
   const { digest: hostProfileDigest, profile: hostProfile } = buildHostProfile(attestation);
-  const taskBytes = toBuffer(taskPrompt);
-  if (taskBytes.length === 0) throw new Error('task prompt missing');
-  const authorityBytes = Buffer.from(authorityEnvelope, 'utf8');
+  const taskBytes = toBuffer(taskAuthority.promptBytes);
   const deliveryBytes = Buffer.concat([
     condition.conditionBytes,
-    Buffer.from(`R4C-SUBJECT-AUTHORITY\nBYTE-COUNT ${authorityBytes.length}\nBEGIN-BYTES\n`, 'utf8'),
-    authorityBytes,
-    Buffer.from('\nEND-BYTES\nR4C-SUBJECT-TASK\n', 'utf8'),
-    Buffer.from(`BYTE-COUNT ${taskBytes.length}\nBEGIN-BYTES\n`, 'utf8'),
-    taskBytes,
-    Buffer.from('\nEND-BYTES\nEND-R4C-SUBJECT\n', 'utf8')
+    frame('R4C-SUBJECT-AUTHORITY', SUBJECT_AUTHORITY_BYTES),
+    frame('R4C-SUBJECT-TASK', taskBytes),
+    Buffer.from('END-R4C-SUBJECT\n', 'utf8')
   ]);
   return Object.freeze({
     qualificationId: slot.qualificationId,
     slotId: slot.slotId,
     taskId: slot.taskId,
+    taskDigest: taskAuthority.taskDigest,
     trialIndex: slot.trialIndex,
     activation: slot.activation,
     surface: slot.surface,
@@ -85,12 +68,40 @@ export function buildSubjectEnvelope({ slot, condition, taskPrompt, authorityEnv
     semanticByteCount: condition.semanticByteCount,
     conditionRenderSha256: condition.conditionRenderSha256,
     taskPromptByteCount: taskBytes.length,
-    taskPromptSha256: sha256Hex(taskBytes),
-    authorityEnvelopeSha256: sha256Hex(authorityBytes),
+    taskPromptSha256: taskAuthority.promptSha256,
+    authorityEnvelopeId: SUBJECT_AUTHORITY_ID,
+    authorityEnvelopeSha256: sha256Hex(SUBJECT_AUTHORITY_BYTES),
     hostProfile,
     hostProfileDigest,
     deliveryByteCount: deliveryBytes.length,
     deliverySha256: sha256Hex(deliveryBytes),
     deliveryBytes
   });
+}
+
+function validateTaskAuthority(taskAuthority, slot) {
+  assertExactKeys(taskAuthority, TASK_AUTHORITY_KEYS, 'task authority');
+  if (!['PUBLIC_SYNTHETIC_TASK_V1','EXTERNAL_QUALIFICATION_TASK_V1'].includes(taskAuthority.kind)) throw new Error('task authority kind invalid');
+  if (taskAuthority.taskId !== slot.taskId) throw new Error(`task authority id mismatch: expected ${slot.taskId}, got ${taskAuthority.taskId}`);
+  if (!/^[0-9a-f]{64}$/.test(taskAuthority.taskDigest)) throw new Error('task authority digest invalid');
+  if (slot.taskDigest !== undefined && slot.taskDigest !== taskAuthority.taskDigest) throw new Error(`task authority digest mismatch for ${slot.taskId}`);
+  if (!/^[0-9a-f]{64}$/.test(taskAuthority.promptSha256)) throw new Error('task prompt digest invalid');
+  const taskBytes = toBuffer(taskAuthority.promptBytes);
+  if (taskBytes.length === 0) throw new Error('task prompt missing');
+  if (sha256Hex(taskBytes) !== taskAuthority.promptSha256) throw new Error(`task prompt digest mismatch for ${slot.taskId}`);
+}
+
+function frame(label, bytes) {
+  return Buffer.concat([
+    Buffer.from(`${label}\nBYTE-COUNT ${bytes.length}\nBEGIN-BYTES\n`, 'utf8'),
+    bytes,
+    Buffer.from(`\nEND-BYTES\n`, 'utf8')
+  ]);
+}
+
+function assertExactKeys(value, expected, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} missing`);
+  const actual = Object.keys(value).sort();
+  const wanted = [...expected].sort();
+  if (actual.length !== wanted.length || actual.some((key, index) => key !== wanted[index])) throw new Error(`unexpected ${label} field set: ${actual.join(',')}`);
 }
