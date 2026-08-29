@@ -191,7 +191,7 @@ test('rejects symlink or junction traversal that resolves back into the Carrier 
       '--pryzael-source', repositoryRoot,
       '--carrier-main', currentCarrierHead
     ]);
-    assertFail(result, /run directory.*Carrier repository|outside.*worktree|symlink/i);
+    assertFail(result, /run directory.*Carrier repository|outside.*worktree|(?:symlink|symbolic-link|junction|reparse)[^\n]{0,120}(?:redirection|traversal|redirected|unsafe filesystem)/i);
   } finally {
     rmSync(parent, { recursive: true, force: true });
   }

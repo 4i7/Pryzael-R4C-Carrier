@@ -429,7 +429,7 @@ frozenTest('Temporary Chat execution semantics distinguish harness non-execution
 test('documentation requires a distinct fresh isolated Judge Temporary Chat for every SUBJECT chat', () => {
   const text = `${readFileSync(join(repositoryRoot, 'README.md'), 'utf8')}\n${readFileSync(join(repositoryRoot, 'spec/carrier-protocol.md'), 'utf8')}`;
   assert.match(text, /Judge[^\n]{0,180}(different|distinct)[^\n]{0,120}fresh[^\n]{0,120}Temporary Chat/i);
-  assert.match(text, /SUBJECT[^\n]{0,180}(must not|never)[\n]{0,120}(reuse|reused)[^\n]{0,120}Judge/i);
+  assert.match(text, /SUBJECT[^\n]{0,180}(must not|never)[^\n]{0,120}(reuse|reused)[^\n]{0,120}Judge/i);
   assert.match(text, /Judge[^\n]{0,180}(human-observed|operator-attested|not mechanically proven|UNVERIFIED)/i);
 });
 
