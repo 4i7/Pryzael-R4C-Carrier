@@ -1,0 +1,124 @@
+{
+  "manifestSchemaVersion": "r4c-frozen-manifest-v1",
+  "identity": {
+    "repository": "4i7/Pryzael",
+    "sourceCommit": "3bba19e0be936e7b9d3554ac737d32f5cf84c846",
+    "sourceTree": "29c3d97126d0f11de8d5c89dddf21f23d861f257",
+    "canonicalSkillsTree": "4395ef86a309ed610f4860f47284d0e4da572914",
+    "pluginVersion": "0.3.0"
+  },
+  "rendererVersion": "r4c-condition-render-v1",
+  "rendererImplementationSha256": "1e9f6181fe5c28694e2d41712cf51c6c675254a320cba520bbddd3f6781c66d3",
+  "entries": [
+    {
+      "path": "skills/architect/SKILL.md",
+      "blobSha1": "42d4e18112804fc8340d97ee77293b29b4f55a33",
+      "byteCount": 3818,
+      "sha256": "d0b0542b951c03cb44425db874a87ed711975fe3efe648e420dea726a850c5f5"
+    },
+    {
+      "path": "skills/architect/references/design-space-gate.md",
+      "blobSha1": "ac594b14243844ea3977cb58face7734fa575f7b",
+      "byteCount": 2331,
+      "sha256": "4562f30e057d8522f86d286ef3d00c7baff1dbbc3901f9fc79bc4d69a58c1fae"
+    },
+    {
+      "path": "skills/blast-radius/SKILL.md",
+      "blobSha1": "97fc5875988847a8c108e98192e1a0139a604d0e",
+      "byteCount": 2656,
+      "sha256": "818d51906518335e13cd55ffee0232fdb4452c9ee37db82bbc84bec31fbd4e74"
+    },
+    {
+      "path": "skills/figure-it-out/SKILL.md",
+      "blobSha1": "4d078fbcedbed860f6d92790105309e0671849a0",
+      "byteCount": 3568,
+      "sha256": "61e0c71ec23236ee3a3fe783b225e417d566cdca029edba5bbb6685649a8ed0f"
+    },
+    {
+      "path": "skills/fix-root-causes/SKILL.md",
+      "blobSha1": "63bfd3fa6d6a51940063dc9868c63ee445507ed4",
+      "byteCount": 3131,
+      "sha256": "a40816597336d811cc16eeaba0dc986348f8f94b4a7e3277ecd5ff9bfd682d91"
+    },
+    {
+      "path": "skills/fix-root-causes/references/tdd-regression.md",
+      "blobSha1": "103261a92fa6842c5f4f64f00b328e9269af9e9b",
+      "byteCount": 1238,
+      "sha256": "0ca6bb5de0accc171491745e04c61ab4d3563ba9df1a63ebcc779f4f28bc9d4e"
+    },
+    {
+      "path": "skills/how/SKILL.md",
+      "blobSha1": "1aa1b35243e58d9ba7449f0a52658231bf8a28ef",
+      "byteCount": 3401,
+      "sha256": "b111a4364fffb8e6949fe6b5bee43195b63bc8be555c0af433ada26ef72137c2"
+    },
+    {
+      "path": "skills/interrogate/SKILL.md",
+      "blobSha1": "69da4c8551b72ce4420df25fe127480be361abff",
+      "byteCount": 3291,
+      "sha256": "350779183db1c5b7926dc9b4fd2bb79c7d833da31ed08331fa62d48848fced2a"
+    },
+    {
+      "path": "skills/interrogate/references/github-exact-head-review.md",
+      "blobSha1": "f20b56a0467ecf7013eba11688227747d772b607",
+      "byteCount": 5355,
+      "sha256": "3ce2a84e95e1974c4f7d70a8b382f6b9bbc94763262ba9fac7f23b0d8b91cd1b"
+    },
+    {
+      "path": "skills/prove-it-works/SKILL.md",
+      "blobSha1": "8306b0ff1a022ffb9909335cfbef6ebcdc33d2b0",
+      "byteCount": 2963,
+      "sha256": "669697d0f5782a01a589c9447382d9d3ac5d5022fcd0a5212045d3955162684f"
+    },
+    {
+      "path": "skills/prove-it-works/references/create-verification-harness.md",
+      "blobSha1": "c5f3172fd7de861bbc8d8701942ec59a2ba2b0d6",
+      "byteCount": 2188,
+      "sha256": "7bf8dda02582d2dbacfa328418a81fe3c64d9c5e7677a529102a43a1291becf6"
+    },
+    {
+      "path": "skills/prove-it-works/references/maintain-verification-harness.md",
+      "blobSha1": "2a91b0c4bd64bbf3322faf684bf2a7bbb5901a75",
+      "byteCount": 1652,
+      "sha256": "4f57ea14c71ca57e0d9494d5036563d5517bf9d21b1a487f39b65e11223597be"
+    },
+    {
+      "path": "skills/sequence-verifiable-units/SKILL.md",
+      "blobSha1": "2bdebaa20cf74dcd727745d1ccc78c9f86a26570",
+      "byteCount": 2926,
+      "sha256": "3a89c8aee570b8ba6be73b0568283eb577a059a366359e98237ce5579debad0c"
+    },
+    {
+      "path": "skills/show-me-your-work/SKILL.md",
+      "blobSha1": "df77d5444e33bc8331a355a6c9863f4dc7913a57",
+      "byteCount": 2775,
+      "sha256": "8717ad6a56289bb3f4aafdc2e88db26550ede28cef20892743e9efbc3d97e5f1"
+    },
+    {
+      "path": "skills/show-me-your-work/assets/decision-log-template.tsv",
+      "blobSha1": "db220376ecb8c582a6a4f6575a8f26469603a38d",
+      "byteCount": 38,
+      "sha256": "6779378006a2f5225e8c06deb84f1d913fb532041ebbb6e50d94600bfe3f4b76"
+    },
+    {
+      "path": "skills/why/SKILL.md",
+      "blobSha1": "d1223e2fffb5862dc3ed9be2c1eafd38acccb562",
+      "byteCount": 3150,
+      "sha256": "0cd6cd57b3707d17ebe7ff8238e3998bed5341aaebb7005ca62abe916ad1b4ca"
+    },
+    {
+      "path": "skills/why/references/epistemics.md",
+      "blobSha1": "e7e0d6394cbc769a81f1449554054fd5763a3c5c",
+      "byteCount": 1524,
+      "sha256": "ca658145de54470027010cbd24eb0b0ae95873a53d3504107aa0441b4ef3f115"
+    },
+    {
+      "path": "skills/why/references/evidence-map.md",
+      "blobSha1": "f66d16532c6f780aa0127ca2c89ddff88d445732",
+      "byteCount": 1634,
+      "sha256": "a2d1322a4ac60cadb089045326d5e9fd15a1a964c6cf1399a3390a71d2fa2a0d"
+    }
+  ],
+  "conditionRenderSha256": "d4954eca15a58094daf185d30cd0343cbc9fc550bfc57bf30e3bc789b59d7557",
+  "manifestSha256": "456bf072c4f68c2dfdee18152930dc8eb0194c4c723d830601f78d463d8a1d2c"
+}

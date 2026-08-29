@@ -1,0 +1,4 @@
+{
+  "protocol": "public-synthetic-judge-v1",
+  "instruction": "For this public mechanics fixture only, return a structural TrialResult object that binds the supplied response digest. Do not infer or request any experimental condition identity."
+}

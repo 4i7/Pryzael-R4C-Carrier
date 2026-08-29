@@ -1,0 +1,12 @@
+{
+  "name": "pryzael-r4c-carrier",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "dry-run": "node scripts/public-dry-run.mjs",
+    "scan": "node scripts/scan-public-repo.mjs"
+  }
+}

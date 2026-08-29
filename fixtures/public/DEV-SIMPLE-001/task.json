@@ -1,0 +1,4 @@
+{
+  "taskId": "DEV-SIMPLE-001",
+  "prompt": "A cache helper stores values under lower-cased keys but looks them up using the caller's original key. Identify the violated invariant, propose the smallest coherent repair, and name one focused verification that would fail before the repair and pass after it."
+}
