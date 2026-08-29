@@ -9,9 +9,7 @@ export function runPublicDryRunMechanics({ identity, manifest, materialByPath, t
   if (!Array.isArray(tasks) || tasks.length !== 2) throw new Error('public dry-run requires exactly two development tasks');
   const byTask = new Map(tasks.map((task) => [task.taskId, task]));
   if (byTask.size !== tasks.length) throw new Error('duplicate public development task');
-  for (const required of ['DEV-SIMPLE-001', 'DEV-REPLAN-001']) {
-    if (!byTask.has(required)) throw new Error(`required public development task missing: ${required}`);
-  }
+  for (const required of ['DEV-SIMPLE-001', 'DEV-REPLAN-001']) if (!byTask.has(required)) throw new Error(`required public development task missing: ${required}`);
 
   const current = renderCurrent({ materialByPath, manifest });
   const absent = renderAbsent();
@@ -36,6 +34,8 @@ export function runPublicDryRunMechanics({ identity, manifest, materialByPath, t
       taskId: slot.taskId,
       conditionId: slot.conditionId,
       trialIndex: slot.trialIndex,
+      activation: slot.activation,
+      surface: slot.surface,
       artifactIdentity: slot.conditionId === 'CURRENT_PRYZAEL' ? identity.sourceCommit : 'NONE',
       conditionRenderSha256: condition.conditionRenderSha256,
       responseSha256: response.sha256,
@@ -51,20 +51,7 @@ export function runPublicDryRunMechanics({ identity, manifest, materialByPath, t
   const completeness = validateCompleteness({
     expectedSlots,
     evidence,
-    expectedIdentity: {
-      currentArtifactId: identity.sourceCommit,
-      currentRenderSha256: current.conditionRenderSha256,
-      absentRenderSha256: absent.conditionRenderSha256
-    }
+    expectedIdentity: { currentArtifactId: identity.sourceCommit, currentRenderSha256: current.conditionRenderSha256, absentRenderSha256: absent.conditionRenderSha256 }
   });
-  return Object.freeze({
-    mode: 'PUBLIC_SYNTHETIC_MECHANICS_ONLY',
-    subjects: Object.freeze(subjects),
-    judges: Object.freeze(judges),
-    evidence: Object.freeze(evidence),
-    completeness,
-    currentRenderSha256: current.conditionRenderSha256,
-    absentRenderSha256: absent.conditionRenderSha256,
-    hiddenBaselineExecuted: false
-  });
+  return Object.freeze({ mode: 'PUBLIC_SYNTHETIC_MECHANICS_ONLY', subjects: Object.freeze(subjects), judges: Object.freeze(judges), evidence: Object.freeze(evidence), completeness, currentRenderSha256: current.conditionRenderSha256, absentRenderSha256: absent.conditionRenderSha256, hiddenBaselineExecuted: false });
 }

@@ -8,32 +8,25 @@ export function validateCompleteness({ expectedSlots, evidence, expectedIdentity
     if (expectedById.has(slot.slotId)) throw new Error(`duplicate expected slot: ${slot.slotId}`);
     expectedById.set(slot.slotId, slot);
   }
-
   const seen = new Set();
   for (const record of evidence) {
     if (seen.has(record.slotId)) throw new Error(`duplicate slot evidence: ${record.slotId}`);
     seen.add(record.slotId);
     if (!expectedById.has(record.slotId)) throw new Error(`unexpected slot: ${record.slotId}`);
   }
-  for (const slotId of expectedById.keys()) {
-    if (!seen.has(slotId)) throw new Error(`missing slot: ${slotId}`);
-  }
+  for (const slotId of expectedById.keys()) if (!seen.has(slotId)) throw new Error(`missing slot: ${slotId}`);
 
   const byPair = new Map();
   let noCount = 0;
   let currentCount = 0;
   for (const record of evidence) {
     const expected = expectedById.get(record.slotId);
-    for (const field of ['qualificationId', 'taskId', 'conditionId', 'trialIndex']) {
-      if (record[field] !== expected[field]) {
-        throw new Error(`${field} mismatch for ${record.slotId}: expected ${expected[field]}, got ${record[field]}`);
-      }
+    for (const field of ['qualificationId', 'taskId', 'conditionId', 'trialIndex', 'activation', 'surface']) {
+      if (record[field] !== expected[field]) throw new Error(`${field} mismatch for ${record.slotId}: expected ${expected[field]}, got ${record[field]}`);
     }
     const expectedArtifact = expected.conditionId === 'CURRENT_PRYZAEL' ? expectedIdentity.currentArtifactId : 'NONE';
     if (record.artifactIdentity !== expectedArtifact) throw new Error(`artifact identity mismatch for ${record.slotId}`);
-    const expectedRender = expected.conditionId === 'CURRENT_PRYZAEL'
-      ? expectedIdentity.currentRenderSha256
-      : expectedIdentity.absentRenderSha256;
+    const expectedRender = expected.conditionId === 'CURRENT_PRYZAEL' ? expectedIdentity.currentRenderSha256 : expectedIdentity.absentRenderSha256;
     if (record.conditionRenderSha256 !== expectedRender) throw new Error(`condition render digest mismatch for ${record.slotId}`);
     if (typeof record.responseSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(record.responseSha256)) throw new Error(`response digest invalid for ${record.slotId}`);
     if (!record.judgeResult || typeof record.judgeResult !== 'object') throw new Error(`Judge result missing for ${record.slotId}`);

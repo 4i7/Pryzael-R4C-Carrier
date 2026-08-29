@@ -2,6 +2,8 @@ import { createHmac } from 'node:crypto';
 import { sha256Hex, stableJson, toBuffer } from './hash.mjs';
 
 export const CONDITION_IDS = Object.freeze(['NO_PRYZAEL', 'CURRENT_PRYZAEL']);
+export const ACTIVATION = 'CONDITIONED_BEHAVIOR';
+export const SURFACE = 'NATIVE';
 
 export function generateSlots({ qualificationId, taskIds, conditions = CONDITION_IDS, trialIndices }) {
   if (typeof qualificationId !== 'string' || qualificationId.length === 0) throw new Error('qualificationId required');
@@ -23,7 +25,7 @@ export function generateSlots({ qualificationId, taskIds, conditions = CONDITION
     if (typeof taskId !== 'string' || taskId.length === 0) throw new Error('invalid task identity');
     for (const conditionId of orderedConditions) {
       for (const trialIndex of trials) {
-        const identity = { qualificationId, taskId, conditionId, trialIndex };
+        const identity = { qualificationId, taskId, conditionId, trialIndex, activation: ACTIVATION, surface: SURFACE };
         slots.push(Object.freeze({ ...identity, slotId: `slot-${sha256Hex(stableJson(identity)).slice(0, 32)}` }));
       }
     }
@@ -40,7 +42,9 @@ export function deriveJudgeBlindId(slot, blindingKey) {
     slotId: slot.slotId,
     taskId: slot.taskId,
     conditionId: slot.conditionId,
-    trialIndex: slot.trialIndex
+    trialIndex: slot.trialIndex,
+    activation: slot.activation,
+    surface: slot.surface
   });
   return `jb-${createHmac('sha256', key).update(payload, 'utf8').digest('hex')}`;
 }

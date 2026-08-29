@@ -79,6 +79,8 @@ export function buildSubjectEnvelope({ slot, condition, taskPrompt, authorityEnv
     slotId: slot.slotId,
     taskId: slot.taskId,
     trialIndex: slot.trialIndex,
+    activation: slot.activation,
+    surface: slot.surface,
     conditionState: condition.state,
     semanticByteCount: condition.semanticByteCount,
     conditionRenderSha256: condition.conditionRenderSha256,
