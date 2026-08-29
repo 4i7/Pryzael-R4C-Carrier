@@ -34,7 +34,7 @@ Public synthetic mechanics are explicitly separate. `npm run dry-run` prepares e
 
 ## Tracked public-distribution scan
 
-`npm run scan` enumerates `git ls-tree -r HEAD` and treats the tracked Git artifact, not arbitrary workspace traversal, as repository-boundary authority. It rejects tracked symlinks (mode `120000`), unexpected gitlinks/submodules (mode `160000`), forbidden hidden/frozen-source path classes, non-public fixture classes, and structural drift in the frozen manifest, public task prompts, public Judge fixture, or qualification commitment. An external `frozen-pryzael/` checkout disappears from this authority naturally when it is untracked; a tracked path under that name is rejected rather than skipped.
+`npm run scan` enumerates `git ls-tree -r HEAD` and treats the tracked Git artifact, not arbitrary workspace traversal, as repository-boundary authority. It rejects tracked symlinks (mode `120000`), unexpected gitlinks/submodules (mode `160000`), forbidden hidden/frozen-source path classes, non-public fixture classes, and structural drift in the frozen manifest, public task prompts, public Judge fixture, or qualification commitment. Beneath `fixtures/public/**`, the tracked blob inventory is closed to exactly five paths: the two public `task.json` files, their two `synthetic-response.txt` files, and `fixtures/public/judge-authority.json`; any additional or missing tracked blob fails closed. An external `frozen-pryzael/` checkout disappears from this authority naturally when it is untracked; a tracked path under that name is rejected rather than skipped.
 
 The scan establishes mechanically detectable tracked public-boundary invariants only. It does not claim proof that every possible semantic leak is absent.
 

@@ -50,7 +50,7 @@ Finally scan the exact tracked Git artifact:
 npm run scan
 ```
 
-`npm run scan` proves mechanically detectable invariants of the **tracked public repository tree**. It does not prove absence of every possible semantic leak.
+`npm run scan` treats the tracked Git tree as repository-boundary authority and rejects drift from the exact closed five-file blob inventory under `fixtures/public/**`: the two public task files, their two synthetic responses, and `judge-authority.json`. It proves mechanically detectable invariants of the **tracked public repository tree** only and does not prove absence of every possible semantic leak.
 
 ## Synthetic mechanics are not R4C evidence
 

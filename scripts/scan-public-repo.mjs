@@ -9,6 +9,13 @@ import { validateQualificationCommitment } from '../src/qualification-authority.
 import { verifyPublicTaskPrompt } from '../src/public-task-authority.mjs';
 
 export const PUBLIC_SCAN_CLAIM = 'MECHANICALLY_DETECTABLE_TRACKED_BOUNDARY_ONLY';
+export const PUBLIC_FIXTURE_TRACKED_PATHS = Object.freeze([
+  'fixtures/public/DEV-REPLAN-001/synthetic-response.txt',
+  'fixtures/public/DEV-REPLAN-001/task.json',
+  'fixtures/public/DEV-SIMPLE-001/synthetic-response.txt',
+  'fixtures/public/DEV-SIMPLE-001/task.json',
+  'fixtures/public/judge-authority.json'
+]);
 const rootDefault = resolve(import.meta.dirname, '..');
 const forbiddenPathClass = /(^|\/)(skills|worker|mcp|evidence|results|private|hidden|held[-_]?out|frozen-pryzael)(\/|$)/i;
 const suspiciousPath = /(^|\/)(real[-_]?baseline|routing[-_]?ledger|blind[-_]?mapping|retry[-_]?ledger|r5[-_]?candidate|pr10)(\/|\.|-|_|$)/i;
@@ -23,6 +30,15 @@ export function scanTrackedRepository({ root = rootDefault } = {}) {
     if (forbiddenPathClass.test(entry.path)) throw new Error(`forbidden tracked public-boundary path: ${entry.path}`);
     if (suspiciousPath.test(entry.path)) throw new Error(`suspicious hidden/candidate tracked path: ${entry.path}`);
     if (entry.path.startsWith('fixtures/') && !entry.path.startsWith('fixtures/public/')) throw new Error(`non-public fixture path: ${entry.path}`);
+  }
+
+  const publicFixtureFiles = paths.filter((path) => path.startsWith('fixtures/public/'));
+  if (JSON.stringify(publicFixtureFiles) !== JSON.stringify(PUBLIC_FIXTURE_TRACKED_PATHS)) {
+    const expected = new Set(PUBLIC_FIXTURE_TRACKED_PATHS);
+    const actual = new Set(publicFixtureFiles);
+    const unexpected = publicFixtureFiles.filter((path) => !expected.has(path));
+    const missing = PUBLIC_FIXTURE_TRACKED_PATHS.filter((path) => !actual.has(path));
+    throw new Error(`public fixture inventory mismatch: unexpected=[${unexpected.join(', ')}] missing=[${missing.join(', ')}]`);
   }
 
   const frozenFiles = paths.filter((path) => path.startsWith('frozen/'));
