@@ -309,5 +309,7 @@ frozenTest('successful public human 4/4 validation remains explicitly NOT_R4C_EV
   assert.equal(summary.authoritativeR4cEvidence, false);
   assert.equal(summary.completeness.total, 4);
   assert.equal(summary.hiddenBaselineExecuted, false);
-  assert.equal(summary.realTemporaryChatExecuted, false);
+  assert.equal(summary.realTemporaryChatExecution, 'UNVERIFIED');
+  assert.equal(summary.realTemporaryChatExecutedByHarness, false);
+  assert.equal(Object.hasOwn(summary, 'realTemporaryChatExecuted'), false);
 }));

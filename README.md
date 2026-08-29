@@ -10,7 +10,7 @@ The Carrier is subordinate to the frozen Pryzael R4 authority. Historical CURREN
 
 Public repository material includes Carrier implementation/documentation, digest/path/blob identity metadata, the non-secret frozen qualification commitment index, and explicitly synthetic development fixtures. Real SUBJECT bodies, real Judge authority/results, routing/blind maps, private retry/host ledgers, and held-out prompts/predicates remain private or hidden outside this repository. The hidden qualification packet is neither needed nor authorized for public mechanics verification.
 
-Real SUBJECT and Judge execution remains human-operated in fresh ChatGPT Web Temporary Chats (or the already-authorized equivalent Judge isolation boundary). There is no browser automation, paid model API, resident supervisor, production Pryzael runtime, or PR #10/R5 evaluation path here.
+Real SUBJECT and Judge execution remains human-operated in fresh ChatGPT Web Temporary Chats. There is no browser automation, paid model API, resident supervisor, production Pryzael runtime, or PR #10/R5 evaluation path here.
 
 ## Qualification runtime and safe entry point
 
@@ -22,7 +22,7 @@ From a clean Carrier checkout using Node 22.23.2:
 npm test
 ```
 
-Prepare the exact historical Pryzael source as an external, untracked checkout:
+Prepare the exact historical Pryzael source as a separate checkout:
 
 ```sh
 git clone https://github.com/4i7/Pryzael.git frozen-pryzael
@@ -56,19 +56,26 @@ npm run scan
 
 `npm run human-run --` is a thin I/O/orchestration surface for the already-authorized four-slot **public human development dry run**. It reuses the same canonical Carrier slot, task, renderer, SUBJECT, response-capture, blinding, Judge-envelope, host-profile, and public four-slot completeness authorities. It does not define alternate framing or evaluation semantics.
 
-A human run requires an explicit private run directory outside the Carrier worktree. There is no repository-local default. The harness resolves/canonicalizes the requested path before sensitive creation and rejects the repository root, every descendant, and symlink/junction traversal that resolves back into the worktree. Real SUBJECT delivery files, captured response bytes, Judge packets/results, blinding state, condition/blind associations, and private run state are written only under that external directory. `npm run scan` is still useful for the tracked distribution, but it is not the protection boundary for real operator artifacts.
+A human run requires an explicit private run directory outside the Carrier worktree. There is no repository-local default. The harness canonicalizes the run root and revalidates every sensitive child directory and artifact at the point of use. `private-run-state.json`, `host-attestations/**`, `subjects/**`, `responses/**`, `judges/**`, `judge-results/**`, and state temporary files must resolve under the exact canonical run root and outside the Carrier worktree. Pre-created symlinks, Windows junction/reparse redirections observable through Node, and later child-directory substitutions fail closed.
 
-Initialization verifies the current Carrier source commit supplied by the operator and reproduces the tracked canonical manifest from the exact external frozen Pryzael checkout. It creates fresh cryptographically random private blinding state; it never imports the deterministic synthetic dry-run key or a synthetic fixture response.
+`private-run-state.json` is a durable coordination record, not semantic authority. Every command reload reconstructs the Carrier identity, frozen manifest and CURRENT/ABSENT renders, canonical four-slot identity, and blind associations before using state. Final validation additionally reconstructs host attestations, SUBJECT packets, response captures, Judge packets, and Judge-result captures from the preserved artifacts before calling canonical public completeness.
 
-A PowerShell-compatible setup looks like this. The paths shown are examples; both `$pryzael` and `$run` should be outside the Carrier checkout for an actual operator run:
+State updates use a fresh exclusive temporary sibling, flush it, revalidate the fixed state path, and rename it into place. Established evidence artifacts are never silently overwritten: an exact existing artifact may be reused after a crash, while differing bytes fail closed. Node/platform APIs do not provide a portable, race-proof no-follow transaction across all filesystem operations, so the threat boundary is fail-closed validation before/after sensitive uses and rejection of observable symlink/junction/reparse redirection, not a claim of immunity to an attacker racing kernel namespace operations between syscalls.
+
+### Safe PowerShell setup
+
+The example first derives the Carrier repository root from Git itself, so it remains correct when launched from any repository subdirectory. The run path is a sibling of the repository root. Do not manually create `$run`; `init` performs the guarded creation.
 
 ```powershell
-$carrierMain = (git rev-parse HEAD).Trim()
-$pryzael = (Resolve-Path ..\Pryzael-r4c-frozen).Path
-$run = Join-Path (Resolve-Path ..).Path "r4c-public-human-run"
-New-Item -ItemType Directory -Force -Path $run | Out-Null
+$carrierRoot = (git rev-parse --show-toplevel).Trim()
+if (-not $carrierRoot) { throw "Not inside the Carrier repository" }
+$carrierRoot = (Resolve-Path $carrierRoot).Path
+$carrierMain = (git -C $carrierRoot rev-parse HEAD).Trim()
+$carrierParent = Split-Path -Parent $carrierRoot
+$pryzael = (Resolve-Path (Join-Path $carrierParent "Pryzael-r4c-frozen")).Path
+$run = Join-Path (Split-Path -Parent $carrierRoot) "r4c-public-human-run"
 
-npm run human-run -- init `
+npm --prefix $carrierRoot run human-run -- init `
   --run-dir $run `
   --pryzael-source $pryzael `
   --carrier-main $carrierMain
@@ -92,58 +99,85 @@ npm run human-run -- init `
 }
 ```
 
-Do not convert an unknown or unobservable predicate to `false`. If every required visible predicate cannot be established, `prepare-subject` records that slot as `INCONCLUSIVE` instead of preparing a normal SUBJECT claim. Internal ChatGPT routing/backend state remains `UNVERIFIED` because the harness cannot observe it.
+Do not convert an unknown or unobservable predicate to `false`. If every required visible predicate cannot be established, `prepare-subject` records that slot as `INCONCLUSIVE` instead of preparing a normal SUBJECT claim. Internal ChatGPT routing/backend state remains `UNVERIFIED` because the harness cannot observe it. The accepted attestation bytes are preserved under `host-attestations/` and rebound during final validation; this prevents later mutable-state edits from redefining already-established host evidence. It does not prove that the operator's original visible attestation was truthful.
 
-For one slot:
+### SUBJECT transfer: generated file is exact, web ingress is unverified
+
+For every public slot, create a **fresh Temporary Chat** for SUBJECT execution and use it only for that SUBJECT execution.
 
 ```powershell
 $slot = "<slot id printed by init>"
 $attestation = Join-Path $run "host-$slot.json"
 
-npm run human-run -- prepare-subject `
+npm --prefix $carrierRoot run human-run -- prepare-subject `
   --run-dir $run `
   --slot $slot `
   --attestation-file $attestation
 ```
 
-The generated `subjects/<slot>.subject.bin` is the exact canonical `deliveryBytes` buffer. Deliver those bytes without reconstructing, normalizing, parsing, or reserializing the packet.
+The CLI reports these distinct facts:
 
-After the human SUBJECT run, supply an explicit external capture file containing the exact response bytes:
+- `generatedDeliveryFile: EXACT_CANONICAL_BYTES` — `subjects/<slot>.subject.bin` exactly equals canonical `buildSubjectEnvelope().deliveryBytes`.
+- `webIngressTransfer: HUMAN_OPERATED` — Carrier does not automate the ChatGPT Web composer.
+- `browserModelVisibleIngressBytes: UNVERIFIED` — Carrier does not observe or prove the bytes that the browser/backend ultimately made model-visible.
+
+Supported web transfer procedure:
+
+1. Read the already-generated `.subject.bin` as exact valid UTF-8 text.
+2. Place that textual content into the fresh Temporary Chat composer.
+3. Do **not** intentionally edit, trim, normalize, annotate, prefix, suffix, or reframe the packet.
+4. Submit it.
+
+This procedure does not require reconstructing packet framing. The source file is canonically exact; clipboard, browser, composer, transport, backend, and model-visible byte preservation are outside Carrier mechanical observation. Do not substitute an attachment-upload procedure unless its actual model-visible semantics have been separately established.
+
+After the human SUBJECT run, supply an explicit external capture file containing the response bytes you obtained:
 
 ```powershell
 $response = Join-Path $run "captured-$slot.bin"
 
-npm run human-run -- capture-response `
+npm --prefix $carrierRoot run human-run -- capture-response `
   --run-dir $run `
   --slot $slot `
   --response-file $response
 
-npm run human-run -- prepare-judge `
+npm --prefix $carrierRoot run human-run -- prepare-judge `
   --run-dir $run `
   --slot $slot
 ```
 
-`capture-response` preserves the operator-supplied file bytes exactly, including CRLF/LF distinctions, trailing spaces, and multibyte UTF-8. It proves only **the exact bytes of that supplied capture file**. It does not prove inaccessible browser/backend internal bytes. If exact response bytes are unavailable, do not reconstruct them; the run is `INCONCLUSIVE`. Malformed UTF-8 also fails closed.
+`capture-response` preserves the operator-supplied file bytes exactly, including CRLF/LF distinctions, trailing spaces, and multibyte UTF-8. It proves only `EXACT_BYTES_OF_OPERATOR_SUPPLIED_CAPTURE_FILE_ONLY`. It does not prove inaccessible browser/backend response bytes. If exact response bytes are unavailable, do not reconstruct them; the slot becomes `INCONCLUSIVE`. Malformed UTF-8 also fails closed.
 
-`prepare-judge` prints an opaque `judgeBlindId` and writes `judges/<judgeBlindId>.judge.bin` plus safe integrity metadata. Judge-facing filenames/metadata do not disclose the true condition or private slot mapping. After the human Judge returns its public structural TrialResult JSON object, preserve it in an explicit external file and record it by blind ID:
+### Judge transfer: a different fresh isolated Temporary Chat
+
+For **every** public slot, the Judge packet must be executed in a **different fresh isolated Temporary Chat** from the SUBJECT chat. The SUBJECT chat must never be reused as the Judge chat.
+
+Before Judge execution, the Judge chat must not previously contain the SUBJECT packet, SUBJECT response-generation context, condition material, true condition identity, the corresponding SUBJECT conversation, or another Judge execution where independent Judge sessions are required. The public harness does not mechanically attest ChatGPT-side Judge isolation; that boundary is human-observed/operator-attested and is therefore not mechanically proven by Carrier.
+
+`prepare-judge` writes `judges/<judgeBlindId>.judge.bin` plus safe integrity metadata. Its CLI uses the same three ingress classifications as SUBJECT: exact canonical generated file, human-operated web transfer, browser/model-visible ingress unverified. Transfer the `.judge.bin` textual content using the same read-as-valid-UTF-8 -> paste unchanged -> submit procedure, but into the distinct fresh Judge Temporary Chat.
+
+After the human Judge returns its public structural TrialResult JSON object, preserve it in an explicit external file and record it by blind ID:
 
 ```powershell
 $blind = "<judgeBlindId printed by prepare-judge>"
 $judgeResult = Join-Path $run "judge-result-$blind.json"
 
-npm run human-run -- record-judge-result `
+npm --prefix $carrierRoot run human-run -- record-judge-result `
   --run-dir $run `
   --blind-id $blind `
   --result-file $judgeResult
 ```
 
-Repeat the subject/response/Judge sequence for all four initialized slots, using fresh Temporary Chats and truthful visible host attestations as required by the experiment. Then validate only the public development run:
+Repeat the complete SUBJECT/response/Judge/Judge-result sequence for all four initialized slots. Then validate only the public development run:
 
 ```powershell
-npm run human-run -- validate --run-dir $run
+npm --prefix $carrierRoot run human-run -- validate --run-dir $run
 ```
 
-A successful validation is always classified as `PUBLIC_HUMAN_DEVELOPMENT_DRY_RUN` and `NOT_R4C_EVIDENCE`, with `authoritativeR4cEvidence=false`. Four-of-four public human development completeness is never promoted to authoritative 42-slot R4C evidence. Implementing or invoking the harness alone does not prove that any real Temporary Chat execution occurred.
+Final validation rereads and reconstructs all four canonical evidence records before completeness. A successful summary remains body-free and reports `PUBLIC_HUMAN_DEVELOPMENT_DRY_RUN`, `NOT_R4C_EVIDENCE`, `authoritativeR4cEvidence=false`, `hiddenBaselineExecuted=false`, `realTemporaryChatExecution="UNVERIFIED"`, and `realTemporaryChatExecutedByHarness=false`. `UNVERIFIED` means Carrier cannot mechanically establish whether the human Temporary Chat execution occurred; it is not a claim that execution did not occur.
+
+### Crash and partial-transition behavior
+
+A partial state write is not accepted as completed evidence. State JSON is replaced from an exclusive flushed temporary sibling to avoid ordinary torn-overwrite behavior. Evidence files are content-established: retry may reuse an already-present exact artifact, but it will not overwrite different established bytes. If a crash leaves only some artifacts written, the coordination state remains at the prior transition and final validation fails until the canonical artifacts/state are coherently re-established; if existing bytes conflict, start a new private run rather than forcing an overwrite.
 
 ## Synthetic mechanics are not R4C evidence
 
