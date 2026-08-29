@@ -1,0 +1,4 @@
+{
+  "taskId": "DEV-REPLAN-001",
+  "prompt": "A planned migration assumes every consumer accepts schema v2, but repository evidence shows one production consumer still requires v1. Replan the change so progress remains safe and independently verifiable without silently weakening compatibility requirements."
+}
