@@ -9,16 +9,20 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout carrier
-        uses: actions/checkout@v4
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          node-version: '22'
+          fetch-depth: 2
+      - name: Setup exact qualification Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+      - name: Verify exact CI checkout identity
+        run: node scripts/verify-ci-checkout.mjs
       - name: Checkout exact frozen Pryzael source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: 4i7/Pryzael
           ref: 3bba19e0be936e7b9d3554ac737d32f5cf84c846
@@ -34,5 +38,5 @@ jobs:
         env:
           PRYZAEL_SOURCE_ROOT: ${{ github.workspace }}/frozen-pryzael
         run: npm run dry-run
-      - name: Scan public repository boundary
+      - name: Scan tracked public repository boundary
         run: npm run scan
