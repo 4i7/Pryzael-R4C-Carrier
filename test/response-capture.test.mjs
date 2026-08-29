@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const api=await import('../src/response-capture.mjs').catch(()=>({}));
+test('exports exact response capture API',()=>{assert.equal(typeof api.captureResponse,'function');assert.equal(typeof api.verifyResponseCapture,'function');assert.equal(typeof api.markResponseInconclusive,'function');});
+test('hashes exact UTF-8 bytes without newline, whitespace, or Markdown normalization',()=>{const lf=api.captureResponse('a\nb  \n');const crlf=api.captureResponse('a\r\nb  \r\n');const trimmed=api.captureResponse('a\nb\n');assert.notEqual(lf.sha256,crlf.sha256);assert.notEqual(lf.sha256,trimmed.sha256);assert.deepEqual(lf.responseBytes,Buffer.from('a\nb  \n'));});
+test('rejects altered response bytes',()=>{const capture=api.captureResponse(Buffer.from('exact\r\nbytes  '));assert.equal(api.verifyResponseCapture(Buffer.from('exact\r\nbytes  '),capture),true);assert.throws(()=>api.verifyResponseCapture(Buffer.from('exact\nbytes'),capture),/response (byte count|digest) mismatch/);});
+test('unrecoverable exact bytes become INCONCLUSIVE rather than reconstructed',()=>{const record=api.markResponseInconclusive('exact visible bytes unavailable');assert.equal(record.status,'INCONCLUSIVE');assert.equal(record.responseBytes,null);assert.equal(record.sha256,null);assert.throws(()=>api.verifyResponseCapture(Buffer.from('reconstructed'),record),/INCONCLUSIVE/);assert.throws(()=>api.captureResponse(null),/exact response bytes unavailable/);});
