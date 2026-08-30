@@ -1,6 +1,6 @@
 # Pryzael R4C Carrier Protocol
 
-This public carrier implements identity, rendering, closed delivery-envelope, exact-byte integrity, blinding, and structural completeness mechanics for the frozen Pryzael R4C experiment. It does not define a new evaluation policy and does not execute the hidden baseline.
+This public carrier implements identity, rendering, closed delivery-envelope, exact-byte integrity, blinding, and structural completeness mechanics for the frozen Pryzael R4C experiment. It does not execute the hidden baseline. The historical protocol below continues to define the stronger Carrier mechanics; [Issue #4](https://github.com/4i7/Pryzael-R4C-Carrier/issues/4) separately defines the proportional public R5 MVP evaluation policy.
 
 ## Frozen CURRENT and qualification authority
 
@@ -9,6 +9,14 @@ This public carrier implements identity, rendering, closed delivery-envelope, ex
 The Carrier stores no copied Skill bodies. An exact historical checkout is freshly verified for commit, root tree, Skill tree, plugin version, complete model-visible path set, Git blob SHA-1, byte count, and SHA-256 before rendering. The generated manifest must exactly reproduce the tracked canonical manifest. The canonical manifest digest is `456bf072c4f68c2dfdee18152930dc8eb0194c4c723d830601f78d463d8a1d2c`; CURRENT is `d4954eca15a58094daf185d30cd0343cbc9fc550bfc57bf30e3bc789b59d7557`; ABSENT is `bddc995273f2a9d22a86706ab3b5b2ca530eb6557a2ea40318725b40a196af64`.
 
 The non-secret frozen qualification commitment records exactly seven task IDs and task digests without held-out prompt or predicate bodies. Authoritative completeness loads that tracked commitment and constructs the required 7 × 2 × 3 matrix internally with activation `CONDITIONED_BEHAVIOR` and surface `NATIVE`. Observed evidence is caller-supplied; the expected authoritative matrix is not.
+
+## Issue #4 R5 MVP path
+
+Issue #4 authorizes a separate lightweight comparison under `evaluation/r5-mvp/**`. That path uses six intentionally public-safe development tasks, one R4 and one R5 SUBJECT execution per task in fresh ChatGPT Web sessions, separate fresh blind A/B Judge sessions, and a concise aggregate summary. Its default initial SUBJECT count is 12, not 42.
+
+The existing human-run harness, exact-byte capture mechanics, blinding machinery, and authoritative 42-slot validator remain available as stronger optional infrastructure. They are not prerequisites for the Issue #4 MVP, and the previously initialized Windows public run does not need to be continued. Hidden R4C execution is not required by the MVP path.
+
+Intentionally public-safe MVP tasks, R4/R5 final outputs, blind Judge reviews, post-judge A/B mappings, and aggregate summaries may be committed only under `evaluation/r5-mvp/**`. Hidden/held-out evaluation material, secrets, private user/operator data, authoritative hidden R4C responses/results, and material whose disclosure would invalidate a hidden benchmark remain excluded.
 
 ## NO condition and closed SUBJECT delivery
 
@@ -30,7 +38,7 @@ The public synthetic Judge authority is one fixed public fixture with a fixed di
 
 ## Public human operator harness
 
-The public human operator harness is an I/O/orchestration layer only. It does not introduce a renderer, slot generator, response-capture format, Judge framing, host-profile authority, or completeness algorithm. Its operator path directly reuses `buildPublicSyntheticSlots()`, `buildPublicTaskAuthority()`, `renderCurrent()`, `renderAbsent()`, `buildSubjectEnvelope()`, `captureResponse()`, `deriveJudgeBlindId()`, `buildPublicSyntheticJudgeAuthority()`, `buildJudgeEnvelope()`, `buildHostProfile()`, and `validatePublicSyntheticCompleteness()`.
+The public human operator harness is an I/O/orchestration layer only and is now an optional stronger diagnostic/qualification path relative to the Issue #4 MVP. It does not introduce a renderer, slot generator, response-capture format, Judge framing, host-profile authority, or completeness algorithm. Its operator path directly reuses `buildPublicSyntheticSlots()`, `buildPublicTaskAuthority()`, `renderCurrent()`, `renderAbsent()`, `buildSubjectEnvelope()`, `captureResponse()`, `deriveJudgeBlindId()`, `buildPublicSyntheticJudgeAuthority()`, `buildJudgeEnvelope()`, `buildHostProfile()`, and `validatePublicSyntheticCompleteness()`.
 
 The harness is restricted to the same four development slots already defined by the public authority: `DEV-SIMPLE-001` and `DEV-REPLAN-001`, each under `NO_PRYZAEL` and `CURRENT_PRYZAEL`, trial index 0, activation `CONDITIONED_BEHAVIOR`, surface `NATIVE`. It creates no caller-defined slot matrix. Its successful classification is always `PUBLIC_HUMAN_DEVELOPMENT_DRY_RUN` / `NOT_R4C_EVIDENCE`; it cannot satisfy or invoke authoritative 42-slot completeness.
 
@@ -133,11 +141,11 @@ Final validation output is body-free: no response body, Judge body, blinding key
 
 ## Completeness and public dry-run
 
-Authoritative R4C completeness is exactly 42 slots: seven committed tasks, `NO_PRYZAEL` and `CURRENT_PRYZAEL`, and trial indices 0, 1, and 2. It rejects missing, duplicate, unexpected, wrong-task/digest, wrong-condition/index, wrong activation/surface, mixed qualification identity, artifact/render mismatch, response/Judge binding mismatch, and paired visible host-profile mismatch.
+Authoritative R4C completeness is exactly 42 slots: seven committed tasks, `NO_PRYZAEL` and `CURRENT_PRYZAEL`, and trial indices 0, 1, and 2. It rejects missing, duplicate, unexpected, wrong-task/digest, wrong-condition/index, wrong activation/surface, mixed qualification identity, artifact/render mismatch, response/Judge binding mismatch, and paired visible host-profile mismatch. This 42-slot requirement belongs only to the authoritative historical R4C qualification path; it is not a default requirement for the Issue #4 R5 MVP.
 
 Public synthetic mechanics are explicitly separate. `npm run dry-run` prepares exactly four slots for `DEV-SIMPLE-001` and `DEV-REPLAN-001`, each under absent and present conditions at trial index 0. The resulting 4/4 structural completeness is never authoritative 42/42 R4C evidence. No hidden task, predicate, response, Judge authority, or result is consumed.
 
-The public human operator harness uses that same four-slot public structural authority with real operator-supplied capture files, but its result remains development evidence only. Neither synthetic 4/4 nor human 4/4 changes the authoritative R4C matrix or its admission semantics.
+The public human operator harness uses that same four-slot public structural authority with real operator-supplied capture files, but its result remains development evidence only. Neither synthetic 4/4 nor human 4/4 changes the authoritative R4C matrix or its admission semantics, and neither is a prerequisite for the Issue #4 MVP.
 
 ## Tracked public-distribution scan
 
@@ -145,4 +153,4 @@ The public human operator harness uses that same four-slot public structural aut
 
 The scan establishes mechanically detectable tracked public-boundary invariants only. It does not claim proof that every possible semantic leak is absent, and it is not the primary containment control for human-run artifacts: those artifacts are rejected from the worktree before creation.
 
-Only implementation, digest-only frozen manifest, non-secret qualification identity metadata, public development fixtures, synthetic responses, tests, and operator documentation belong here. Hidden qualification packet bytes, held-out prompts/predicates, real response bodies, real Judge inputs/results, real routing/blind mappings, private host/retry ledgers, and PR #10/R5 semantic material remain outside this repository.
+Implementation, digest-only frozen manifest, non-secret qualification identity metadata, public development fixtures, synthetic responses, tests, operator documentation, and the intentionally public-safe Issue #4 MVP artifacts under `evaluation/r5-mvp/**` may belong here. Hidden qualification packet bytes, held-out prompts/predicates, authoritative hidden R4C response/Judge bodies, hidden/private routing or blind mappings, private host/retry ledgers, and benchmark-invalidating hidden candidate material remain outside this repository.
