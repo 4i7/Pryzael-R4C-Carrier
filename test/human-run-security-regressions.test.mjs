@@ -169,6 +169,23 @@ function linkDirectory(target, link) {
   symlinkSync(target, link, process.platform === 'win32' ? 'junction' : 'dir');
 }
 
+frozenTest('rejects pre-created host-attestations symlink/junction into the Carrier worktree before private attestation bytes are written', () => withRun((runDir) => {
+  const slot = slots[0];
+  const target = makeRepoTarget('host-attestations');
+  const leaked = join(target, `${slot.slotId}.attestation.bin`);
+  try {
+    linkDirectory(target, join(runDir, 'host-attestations'));
+    const result = prepareSubjectResult(runDir, slot);
+    assertRejected(result);
+    assert.equal(existsSync(leaked), false);
+    const record = readState(runDir).slots.find((entry) => entry.slotId === slot.slotId);
+    assert.equal(record.status, 'INITIALIZED');
+    assert.equal(record.subject, null);
+  } finally {
+    rmSync(target, { recursive: true, force: true });
+  }
+}));
+
 frozenTest('rejects pre-created subjects symlink/junction into the Carrier worktree before private bytes are written', () => withRun((runDir) => {
   const slot = slots[0];
   const target = makeRepoTarget('subjects');
