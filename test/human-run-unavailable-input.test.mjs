@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { buildPublicSyntheticSlots } from '../src/public-task-authority.mjs';
+import { runHuman } from './human-run-test-helper.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '..');
 const frozenSource = resolve(repositoryRoot, 'frozen-pryzael');
 const currentCarrierHead = execFileSync('git', ['-C', repositoryRoot, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
-const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const hasFrozenCheckout = existsSync(resolve(frozenSource, '.git'));
 const slot = buildPublicSyntheticSlots().find((entry) => entry.taskId === 'DEV-SIMPLE-001' && entry.conditionId === 'NO_PRYZAEL');
 const attestation = Object.freeze({
@@ -25,14 +25,6 @@ const attestation = Object.freeze({
   product: 'ChatGPT Web Temporary Chat',
   ordinaryTools: ['GitHub']
 });
-
-function runHuman(args) {
-  return spawnSync(npmCommand, ['--silent', 'run', 'human-run', '--', ...args], {
-    cwd: repositoryRoot,
-    encoding: 'utf8',
-    env: { ...process.env }
-  });
-}
 
 function assertPass(result) {
   assert.equal(result.status, 0, `stdout=${result.stdout ?? ''}\nstderr=${result.stderr ?? ''}`);
