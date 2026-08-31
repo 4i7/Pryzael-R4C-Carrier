@@ -2,15 +2,23 @@
 
 A standalone, public-safe carrier for the frozen Pryzael R4C conditioned-behavior qualification mechanics. It verifies frozen identities, renders the historical CURRENT comparator, prepares closed SUBJECT/Judge delivery envelopes, captures exact UTF-8 responses, validates completeness, and scans the tracked public distribution boundary. It does **not** run the hidden R4C baseline or replace Pryzael.
 
-The authoritative design is [`docs/superpowers/specs/2026-08-29-pryzael-r4c-carrier-design.md`](docs/superpowers/specs/2026-08-29-pryzael-r4c-carrier-design.md). Operational invariants are summarized in [`spec/carrier-protocol.md`](spec/carrier-protocol.md).
+The original detailed Carrier design in [`docs/superpowers/specs/2026-08-29-pryzael-r4c-carrier-design.md`](docs/superpowers/specs/2026-08-29-pryzael-r4c-carrier-design.md) remains historical design context. For the R5 MVP evaluation, [Issue #4](https://github.com/4i7/Pryzael-R4C-Carrier/issues/4) is the controlling project/evaluation decision and [`evaluation/r5-mvp/`](evaluation/r5-mvp/) is the executable MVP path. Operational invariants for the existing stronger Carrier mechanics are summarized in [`spec/carrier-protocol.md`](spec/carrier-protocol.md).
 
 ## Authority and boundaries
 
 The Carrier is subordinate to the frozen Pryzael R4 authority. Historical CURRENT is exactly `4i7/Pryzael` commit `3bba19e0be936e7b9d3554ac737d32f5cf84c846`, tree `29c3d97126d0f11de8d5c89dddf21f23d861f257`, canonical `skills/` tree `4395ef86a309ed610f4860f47284d0e4da572914`, rendered by `r4c-condition-render-v1`.
 
-Public repository material includes Carrier implementation/documentation, digest/path/blob identity metadata, the non-secret frozen qualification commitment index, and explicitly synthetic development fixtures. Real SUBJECT bodies, real Judge authority/results, routing/blind maps, private retry/host ledgers, and held-out prompts/predicates remain private or hidden outside this repository. The hidden qualification packet is neither needed nor authorized for public mechanics verification.
+Public repository material includes Carrier implementation/documentation, digest/path/blob identity metadata, the non-secret frozen qualification commitment index, explicitly synthetic development fixtures, and intentionally public-safe Issue #4 MVP artifacts under `evaluation/r5-mvp/**`. Hidden/held-out SUBJECT bodies, authoritative hidden R4C Judge authority/results, hidden routing/blind maps, private retry/host ledgers, and held-out prompts/predicates remain private or hidden outside this repository. The hidden qualification packet is neither needed nor authorized for public mechanics verification or the R5 MVP path.
 
-Real SUBJECT and Judge execution remains human-operated in fresh ChatGPT Web Temporary Chats. There is no browser automation, paid model API, resident supervisor, production Pryzael runtime, or PR #10/R5 evaluation path here.
+The existing human-run SUBJECT and Judge path remains human-operated in fresh ChatGPT Web Temporary Chats. There is no browser automation, paid model API, resident supervisor, or production Pryzael runtime in that harness. It is an optional stronger diagnostic/qualification path for Issue #4; the R5 MVP instead uses fresh ChatGPT Web sessions plus public-safe artifacts under `evaluation/r5-mvp/**`.
+
+## R5 MVP evaluation
+
+Issue #4 resets the default R4/R5 comparison to a proportional public MVP: six representative public-safe tasks, one fresh ChatGPT Web execution per task/condition, 12 initial SUBJECT executions total, and a separate fresh blind A/B Judge session for each comparison. The default MVP does **not** require hidden R4C execution, Windows/Codex/local filesystem execution, byte-exact browser/backend proof, cryptographic evidence binding, or the authoritative 42-slot matrix.
+
+The previously initialized Windows public run may remain unused. The human-run harness and authoritative 42-slot validator are preserved as optional stronger infrastructure when a concrete observed failure mode or stronger claim actually justifies them.
+
+See [`evaluation/r5-mvp/README.md`](evaluation/r5-mvp/README.md) for the exact public procedure, task set, run/review paths, and admission rule.
 
 ## Qualification runtime and safe entry point
 
@@ -183,7 +191,7 @@ A partial state write is not accepted as completed evidence. State JSON is repla
 
 `npm run dry-run` is intentionally limited to `DEV-SIMPLE-001` and `DEV-REPLAN-001` under the two conditions, one trial each: exactly 4/4 public synthetic slots. That validates carrier mechanics only. It never counts toward the authoritative 7 × 2 × 3 = 42 R4C baseline and does not establish that a real Temporary Chat was opened or isolated.
 
-Authoritative completeness is a separate closed validator. It loads the seven task IDs/digests from the frozen non-secret commitment and internally requires exactly 42 slots with activation `CONDITIONED_BEHAVIOR` and surface `NATIVE`; callers cannot redefine that required matrix.
+Authoritative completeness is a separate closed validator. It loads the seven task IDs/digests from the frozen non-secret commitment and internally requires exactly 42 slots with activation `CONDITIONED_BEHAVIOR` and surface `NATIVE`; callers cannot redefine that required matrix. That 42-slot requirement applies only to the authoritative historical R4C completeness path, not to the Issue #4 R5 MVP comparison.
 
 ## Never commit
 
@@ -191,14 +199,16 @@ Never commit any of the following:
 
 - the hidden qualification packet;
 - hidden/held-out task prompts, predicates, gold/reference material, or Judge rubric material;
-- real SUBJECT response bodies;
-- real Judge authority payloads or Judge results;
-- real routing maps, true-condition maps, blind maps, or blinding keys;
+- authoritative hidden R4C SUBJECT response bodies;
+- authoritative hidden R4C Judge authority payloads or Judge results;
+- hidden/private routing maps, true-condition maps, blind maps, or blinding keys;
 - private host, environment, retry, attestation, or execution ledgers;
-- PR #10/R5 candidate semantic material where the frozen R4 boundary prohibits it;
+- hidden or held-out PR #10/R5 candidate semantic material where disclosure would invalidate a benchmark;
 - a vendored `frozen-pryzael/` checkout or frozen Pryzael Skill bodies.
 
-The external human-run directory is deliberately private operator state and may contain the real operator artifacts above. That permission applies only to the explicitly external directory; none of those artifacts belong in tracked or untracked paths inside the Carrier worktree.
+Issue #4 intentionally allows public-safe R4/R5 MVP task outputs, blind Judge reviews, post-judge A/B mappings, and aggregate summaries **only** under the documented `evaluation/r5-mvp/**` boundary. That narrow exception does not weaken the prohibitions above for hidden/held-out or private material.
+
+The external human-run directory is deliberately private operator state and may contain the real operator artifacts above. That permission applies only to the explicitly external directory; none of those harness artifacts belong in tracked or untracked paths inside the Carrier worktree.
 
 ## Distribution and license boundary
 
