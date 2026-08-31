@@ -1,0 +1,5 @@
+better: B
+equivalent: false
+reasoning: Candidate B is marginally better. Both preserve the pinned production v1 consumer, sequence the migration into independently verifiable transitions, keep dual-version support through the mixed-version state, require real deployment evidence before retiring v1, and separate reversible disablement from final deletion. B is more complete about the zero-v1-dependency gate before the first destructive transition: it explicitly requires checking non-obvious supported paths such as scheduled/offline work, retries, replay/backfill, retained v1 data, and downgrade/rollback obligations, treats unresolved paths as blocking rather than inferred-safe, and requires a successful v1-disabled observation period before deleting implementation support. Those checks strengthen operational safety without pretending the pinned consumer is out of scope or changing the core compatibility requirement. A is also correct and safe, but its zero-v1-consumer and rollback predicates are stated more generally and therefore provide slightly less concrete evidence coverage before irreversible removal.
+major_regression: none
+confidence: high
